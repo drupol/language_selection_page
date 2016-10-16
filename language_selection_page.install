@@ -13,6 +13,11 @@ use Drupal\language_selection_page\Plugin\LanguageNegotiation\LanguageNegotiatio
  */
 function language_selection_page_requirements($phase) {
   $requirements = [];
+
+  if ('install' == $phase) {
+    return $requirements;
+  }
+
   $languages = \Drupal::languageManager()->getNativeLanguages();
   $language_negotiation_config = \Drupal::config('language.negotiation')->get('url');
   $prefixes = array_filter($language_negotiation_config['prefixes']);
