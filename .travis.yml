@@ -59,6 +59,7 @@ before_install:
   - composer global require drupal/coder
   - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
   - phpenv rehash
+  - phpcs --report=full --standard=Drupal $TRAVIS_BUILD_DIR
   - drupal-ti before_install
 
 install:
@@ -71,7 +72,6 @@ after_script:
   - drupal-ti after_script
 
 script:
-  - phpcs --report=full --standard=Drupal $TRAVIS_BUILD_DIR/language_selection_page
   - cd /home/travis/build/drupol/drupal-8/drupal
   - cd core
   - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
