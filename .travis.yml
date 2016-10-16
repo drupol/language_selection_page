@@ -39,6 +39,8 @@ env:
 
     # Simpletest specific commandline arguments, the DRUPAL_TI_SIMPLETEST_GROUP is appended at the end.
     - DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color --concurrency 4 --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT --module user"
+    - SIMPLETEST_BASE_URL="http://127.0.0.1:8080/"
+    - SIMPLETEST_DB="mysql://root:@127.0.0.1/drupal_travis_db"
 
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
