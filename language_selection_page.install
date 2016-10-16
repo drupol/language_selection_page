@@ -15,7 +15,7 @@ function language_selection_page_requirements($phase) {
   $requirements = [];
   $languages = \Drupal::languageManager()->getNativeLanguages();
   $language_negotiation_config = \Drupal::config('language.negotiation')->get('url');
-  $prefixes = array_filter($language_negotiation_config['prefixes']);
+  $prefixes = array_filter((array) $language_negotiation_config['prefixes']);
 
   $lang_list_without_prefix = [];
   foreach ($languages as $language) {
