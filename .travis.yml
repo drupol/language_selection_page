@@ -45,8 +45,6 @@ env:
     # - SIMPLETEST_BASE_URL="http://127.0.0.1:8080/"
     # - SIMPLETEST_DB="mysql://root:@127.0.0.1/drupal_travis_db"
     # - BROWSERTEST_OUTPUT_DIRECTORY="$TRAVIS_BUILD_DIR"
-
-
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
     #- We run phpunit manually in ./travis-ci/travis-script.sh
@@ -77,5 +75,6 @@ after_script:
   - drupal-ti after_script
 
 script:
+  - drupal-ti script
   - cd /home/travis/build/drupol/drupal-8/drupal/core
   - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
