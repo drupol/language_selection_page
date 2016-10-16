@@ -76,6 +76,8 @@ after_script:
   - drupal-ti after_script
 
 script:
+  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/drupal_travis_db; export SIMPLETEST_BASE_URL="http://127.0.0.1:8080"
   - drupal-ti script
   - cd /home/travis/build/drupol/drupal-8/drupal/core
   - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
+
