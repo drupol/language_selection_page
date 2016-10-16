@@ -43,7 +43,7 @@ env:
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
     #- We run phpunit manually in ./travis-ci/travis-script.sh
-    - DRUPAL_TI_RUNNERS="phpunit"
+    - DRUPAL_TI_RUNNERS="phpunit simpletest"
 
 
 mysql:
