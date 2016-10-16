@@ -62,11 +62,10 @@ install:
 before_script:
   - drupal-ti before_script
 
-
 after_script:
   - drupal-ti after_script
 
 script:
-  - cd $TRAVIS_BUILD_DIR/../drupal-8
+  - cd /home/travis/build/drupol/drupal-8/drupal
   - cd core
   - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
