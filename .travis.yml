@@ -55,11 +55,11 @@ mysql:
 
 before_install:
   - composer self-update
-  - composer global require "LionsAd/drupal_ti:dev-master"
   - composer global require drupal/coder
   - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
-  - phpenv rehash
   - phpcs --report=full --standard=Drupal $TRAVIS_BUILD_DIR
+  - composer global require "LionsAd/drupal_ti:dev-master"
+  - phpenv rehash
   - drupal-ti before_install
 
 install:
