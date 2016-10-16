@@ -2,6 +2,7 @@ name: "Language Selection Page"
 description: "Provides an additional language negotiation fallback using a selection page"
 package: Multilingual
 dependencies:
+ - language
  - locale
 configure: language.negotiation
 core: 8.x
