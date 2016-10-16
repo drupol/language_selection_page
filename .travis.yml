@@ -43,7 +43,7 @@ env:
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
     #- We run phpunit manually in ./travis-ci/travis-script.sh
-    - DRUPAL_TI_RUNNERS="simpletest"
+    - DRUPAL_TI_RUNNERS="phpunit"
 
 
 mysql:
@@ -67,8 +67,5 @@ after_script:
   - drupal-ti after_script
 
 script:
-  - drupal-ti script
-  - composer require drupal/language_selection_page
   - cd core
   - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
-# only test our module tests
