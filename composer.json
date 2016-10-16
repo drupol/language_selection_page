@@ -1,0 +1,20 @@
+{
+    "name": "drupal/language_selection_page",
+    "description": "Provides an additional language negotiation fallback using a selection page.",
+    "type": "drupal-module",
+    "license": "GPL-2.0+",
+    "minimum-stability": "dev",
+    "homepage": "https://drupal.org/project/language_selection_page",
+    "authors": [
+        {
+            "name": "Pol Dellaiera (@drupol)",
+            "homepage": "https://www.drupal.org/u/pol",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://drupal.org/project/issues/language_selection_page",
+        "irc": "irc://irc.freenode.org/drupal-contribute",
+        "source": "https://cgit.drupalcode.org/language_selection_page"
+    }
+}
