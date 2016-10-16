@@ -1,0 +1,67 @@
+# @file
+# .travis.yml - Drupal 8 Travis CI Integration
+
+language: php
+
+sudo: false
+
+php:
+#  - 5.5
+  - 5.6
+  - 7
+
+# Not sure what this does
+#matrix:
+#  fast_finish: true
+
+# Set up environment variables.
+env:
+  global:
+    # add composer's global bin directory to the path
+    # see: https://github.com/drush-ops/drush#install---composer
+    - PATH="$PATH:$HOME/.composer/vendor/bin"
+
+    # Configuration variables.
+    - DRUPAL_TI_MODULE_NAME="language_selection_page"
+
+    # Not sure what simpletest group we are using yet.
+    - DRUPAL_TI_SIMPLETEST_GROUP="language_selection_page"
+
+    # The environment to use, supported are: drupal-7, drupal-8
+    - DRUPAL_TI_ENVIRONMENT="drupal-8"
+
+    # Drupal specific variables.
+    - DRUPAL_TI_DB="drupal_travis_db"
+    - DRUPAL_TI_DB_URL="mysql://root:@127.0.0.1/drupal_travis_db"
+    # Note: Do not add a trailing slash here.
+    - DRUPAL_TI_WEBSERVER_URL="http://127.0.0.1"
+    - DRUPAL_TI_WEBSERVER_PORT="8080"
+
+    # Simpletest specific commandline arguments, the DRUPAL_TI_SIMPLETEST_GROUP is appended at the end.
+    - DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color --concurrency 4 --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT --module user"
+
+  matrix:
+    #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
+    #- We run phpunit manually in ./travis-ci/travis-script.sh
+    - DRUPAL_TI_RUNNERS="simpletest"
+
+
+mysql:
+  database: drupal_travis_db
+  username: root
+  encoding: utf8
+
+before_install:
+  - composer self-update
+  - composer global require "LionsAd/drupal_ti:dev-master"
+  - drupal-ti before_install
+
+install:
+  - drupal-ti install
+
+script:
+  - composer require drupal/language_selection_page
+  - cd core
+
+# only test our module tests
+script: ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
