@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *   weight = -110,
  *   name = @Translation("XML HTTP Request"),
  *   description = @Translation("Bails out when the request is an AJAX request."),
- *   run_in_block = FALSE,
+ *   runInBlock = FALSE,
  * )
  */
 class LanguageSelectionPageConditionXMLHTTPRequest extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

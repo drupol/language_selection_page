@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -200,
  *   name = @Translation("Method is valid"),
  *   description = @Translation("Bails out if the method is not present."),
- *   run_in_block = FALSE,
+ *   runInBlock = FALSE,
  * )
  */
 class LanguageSelectionPageConditionMethodIsValid extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

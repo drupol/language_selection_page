@@ -138,9 +138,10 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
   /**
    * Retrieves a configuration object.
    *
-   * This is the main entry point to the configuration API. Calling
-   * @code $this->config('book.admin') @endcode will return a configuration
-   * object in which the book module can store its administrative settings.
+   * This is the main entry point to the configuration API.
+   * Calling @code $this->config('book.admin') @endcode will return a
+   * configuration object in which the book module can store its
+   * administrative settings.
    *
    * @param string $name
    *   The name of the configuration object to retrieve. The name corresponds to
@@ -165,8 +166,8 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
     $config = $this->config('language_selection_page.negotiation');
     $manager = $this->languageSelectionPageConditionManager;
 
-    $defs = array_filter($manager->getDefinitions(), function($value) {
-      return isset($value['run_in_block']) && $value['run_in_block'];
+    $defs = array_filter($manager->getDefinitions(), function ($value) {
+      return isset($value['runInBlock']) && $value['runInBlock'];
     });
     foreach ($defs as $def) {
       /** @var ExecutableInterface $condition_plugin */

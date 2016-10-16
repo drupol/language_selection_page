@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *   weight = -50,
  *   name = @Translation("Blacklisted paths"),
  *   description = @Translation("Ignore paths that are blacklisted."),
- *   run_in_block = TRUE,
+ *   runInBlock = TRUE,
  * )
  */
 class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {
@@ -127,7 +127,12 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
       '#default_value' => implode(PHP_EOL, (array) $this->configuration[$this->getPluginId()]),
       '#size' => 10,
       '#description' => $this->t('Specify on which paths the language selection pages should be circumvented.') . '<br />'
-      . $this->t("Specify pages by using their paths. A path must start with <em>/</em>. Enter one path per line. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page.", ['%blog' => '/blog', '%blog-wildcard' => '/blog/*', '%front' => '<front>']),
+      . $this->t("Specify pages by using their paths. A path must start with <em>/</em>. Enter one path per line. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page.",
+          [
+            '%blog' => '/blog',
+            '%blog-wildcard' => '/blog/*',
+            '%front' => '<front>',
+          ]),
     ];
 
     return $form;

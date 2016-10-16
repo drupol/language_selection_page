@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -90,
  *   name = @Translation("Type of operating mode and display"),
  *   description = @Translation("Select the operating mode and display."),
- *   run_in_block = FALSE,
+ *   runInBlock = FALSE,
  * )
  */
 class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

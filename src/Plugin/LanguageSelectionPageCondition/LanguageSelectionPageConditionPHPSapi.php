@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -120,
  *   name = @Translation("PHP SAPI"),
  *   description = @Translation("Bails out when running on command line."),
- *   run_in_block = FALSE,
+ *   runInBlock = FALSE,
  * )
  */
 class LanguageSelectionPageConditionPHPSapi extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

@@ -55,10 +55,10 @@ class LanguageSelectionPageCondition extends Condition {
    * - FALSE if this condition should be run to determine whether to redirect
    *   to a language page, but not whether to display the block.
    *
-   * @var boolean
+   * @var bool
    *
    * @see \Drupal\language_selection_page\Plugin\Block\LanguageSelectionPageBlock::blockAccess()
    */
-  public $run_in_block;
+  public $runInBlock;
 
 }

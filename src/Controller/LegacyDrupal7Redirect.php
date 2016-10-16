@@ -12,7 +12,11 @@ use Drupal\Core\Url;
 class LegacyDrupal7Redirect extends ControllerBase {
 
   /**
-   * Callback for the language_selection_page.negotiation_language_selection_page_legacy_redirect route.
+   * Main callback.
+   *
+   * Callback for the
+   * language_selection_page.negotiation_language_selection_page_legacy_redirect
+   * route.
    */
   public function doRedirect() {
     return new RedirectResponse(Url::fromRoute('language_selection_page.negotiation_selection_page')->setAbsolute()->toString());

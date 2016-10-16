@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -60,
  *   name = "Index.php",
  *   description = @Translation("Bails out when running the script on another php file than index.php."),
- *   run_in_block = FALSE,
+ *   runInBlock = FALSE,
  * )
  */
 class LanguageSelectionPageConditionIndexPhp extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

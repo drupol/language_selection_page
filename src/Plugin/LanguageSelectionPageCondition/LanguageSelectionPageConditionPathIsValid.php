@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *   weight = -110,
  *   name = @Translation("Valid path"),
  *   description = @Translation("Bails out if the path is not valid."),
- *   run_in_block = TRUE,
+ *   runInBlock = TRUE,
  * )
  */
 class LanguageSelectionPageConditionPathIsValid extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -110,
  *   name = @Translation("Language prefixes"),
  *   description = @Translation("Bails out when enabled languages doesn't have prefixes."),
- *   run_in_block = TRUE,
+ *   runInBlock = TRUE,
  * )
  */
 class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

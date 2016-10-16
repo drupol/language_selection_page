@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = -40,
  *   name = @Translation("Ignore untranslatable (language neutral) entities"),
  *   description = @Translation("Ignore untranslatable entities (such as entities with language set to <em>Not specified</em> or <em>Not applicable</em>, or with content types that are not translatable)"),
- *   run_in_block = TRUE,
+ *   runInBlock = TRUE,
  * )
  */
 class LanguageSelectionPageConditionIgnoreNeutral extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {

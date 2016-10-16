@@ -68,8 +68,15 @@ interface LanguageSelectionPageConditionInterface extends ConditionInterface {
   public function setWeight($weight);
 
   /**
+   * Post config save method.
+   *
    * Method that gets triggered when the configuration of the form
    * has been saved.
+   *
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The FormState object.
    */
   public function postConfigSave(array &$form, FormStateInterface $form_state);
 
