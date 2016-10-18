@@ -64,7 +64,7 @@ before_install:
   - composer global require drupal/coder
   - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
   - phpcs --report=full --standard=Drupal $TRAVIS_BUILD_DIR
-  - composer global require "LionsAd/drupal_ti:dev-master#243c8f0"
+  - composer global require "LionsAd/drupal_ti:dev-master#2cc6e71"
   - phpenv rehash
   - drupal-ti before_install
 
