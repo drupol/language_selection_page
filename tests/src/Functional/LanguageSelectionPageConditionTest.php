@@ -10,7 +10,7 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group language_selection_page
  */
-class TestLanguageSelectionPageCondition extends BrowserTestBase {
+class LanguageSelectionPageConditionTest extends BrowserTestBase {
 
   /**
    * Text to assert for to determine if we are on the Language Selection Page.

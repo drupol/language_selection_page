@@ -42,14 +42,15 @@ env:
     # Simpletest specific commandline arguments, the DRUPAL_TI_SIMPLETEST_GROUP is appended at the end.
     - DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color --concurrency 4 --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT --module user"
 
-    - DRUPAL_TI_PHPUNIT_ARGS="--testsuite functional --group language_selection_page"
+    - DRUPAL_TI_PHPUNIT_ARGS=""
+    - DRUPAL_TI_PHPUNIT_CORE_SRC_DIRECTORY="./tests/src"
+    
     # This should be automatically set.
     # - SIMPLETEST_BASE_URL="http://127.0.0.1:8080/"
     # - SIMPLETEST_DB="mysql://root:@127.0.0.1/drupal_travis_db"
     # - BROWSERTEST_OUTPUT_DIRECTORY="$TRAVIS_BUILD_DIR"
   matrix:
     #- DRUPAL_TI_RUNNERS="phpunit simpletest behat"
-    #- We run phpunit manually in ./travis-ci/travis-script.sh
     - DRUPAL_TI_RUNNERS="phpunit-core"
 
 
@@ -73,12 +74,8 @@ install:
 before_script:
   - drupal-ti before_script
 
+script:
+  - drupal-ti script
+
 after_script:
   - drupal-ti after_script
-
-script:
-  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/drupal_travis_db; export SIMPLETEST_BASE_URL="http://127.0.0.1:8080"
-  - drupal-ti script
-  - cd /home/travis/build/drupol/drupal-8/drupal/core
-  - ../vendor/phpunit/phpunit/phpunit --testsuite functional --group language_selection_page
-
