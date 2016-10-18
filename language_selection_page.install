@@ -56,14 +56,10 @@ function language_selection_page_requirements($phase) {
  * Implements hook_uninstall().
  */
 function language_selection_page_uninstall() {
+  $config = \Drupal::configFactory()->getEditable('language.types');
   $language_types = \Drupal::languageManager()->getLanguageTypes();
-
   foreach ($language_types as $type) {
-    $enabled_methods = \Drupal::configFactory()->get('language.types')->get('negotiation.' . $type . '.enabled') ?: array();
-    if (isset($enabled_methods[LanguageNegotiationLanguageSelectionPage::METHOD_ID])) {
-      unset($enabled_methods[LanguageNegotiationLanguageSelectionPage::METHOD_ID]);
-
-      \Drupal::configFactory()->getEditable('language.types')->set('negotiation.' . $type . '.enabled', $enabled_methods)->save();
-    }
+    $config->clear('negotiation.' . $type . '.enabled.' . LanguageNegotiationLanguageSelectionPage::METHOD_ID);
   }
+  $config->save();
 }
