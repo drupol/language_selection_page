@@ -1,5 +1,5 @@
 title: "Language selection"
-path: language_selection_page
+path: /language_selection_page
 type: standalone
 blacklisted_paths:
  - '/admin'
