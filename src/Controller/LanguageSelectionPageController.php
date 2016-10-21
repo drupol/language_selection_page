@@ -125,27 +125,34 @@ class LanguageSelectionPageController extends ControllerBase {
       return new RedirectResponse(Url::fromRoute('<front>')->setAbsolute()->toString());
     }
 
-    // TODO: This variable will be used in the template.
-    // TODO: We still have to decide what to send in it, and how.
-    $links_array = [];
-    foreach ($language_manager->getNativeLanguages() as $language) {
-      $url = Url::fromUserInput($destination, ['language' => $language]);
-      $links_array[$language->getId()] = [
-        // We need to clone the $url object to avoid using the same one for all
-        // links. When the links are rendered, options are set on the $url
-        // object, so if we use the same one, they would be set for all links.
-        'url' => clone $url,
-        'title' => $language->getName(),
-        'language' => $language,
-        'attributes' => ['class' => ['language-link']],
-      ];
-    }
+    // As we are generating a URL from user input, we need to catch any
+    // exceptions thrown by invalid paths.
+    try {
+      // TODO: This variable will be used in the template.
+      // TODO: We still have to decide what to send in it, and how.
+      $links_array = [];
+      foreach ($language_manager->getNativeLanguages() as $language) {
+        $url = Url::fromUserInput($destination, ['language' => $language]);
+        $links_array[$language->getId()] = [
+          // We need to clone the $url object to avoid using the same one for all
+          // links. When the links are rendered, options are set on the $url
+          // object, so if we use the same one, they would be set for all links.
+          'url' => clone $url,
+          'title' => $language->getName(),
+          'language' => $language,
+          'attributes' => ['class' => ['language-link']],
+        ];
+      }
 
-    $links = [];
-    foreach ($languages as $language) {
-      $url = Url::fromUserInput($destination, ['language' => $language]);
-      $link = $link_generator->generate($language->getName(), $url);
-      $links[$language->getId()] = $link;
+      $links = [];
+      foreach ($languages as $language) {
+        $url = Url::fromUserInput($destination, ['language' => $language]);
+        $link = $link_generator->generate($language->getName(), $url);
+        $links[$language->getId()] = $link;
+      }
+    }
+    catch (\InvalidArgumentException $exception) {
+      return new RedirectResponse(Url::fromRoute('<front>')->setAbsolute()->toString());
     }
 
     return [
