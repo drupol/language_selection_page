@@ -93,4 +93,11 @@ abstract class LanguageSelectionPageConditionBase extends ConditionPluginBase im
 
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function alterPageContent(array &$content = array()) {
+
+  }
+
 }

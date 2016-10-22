@@ -80,4 +80,12 @@ interface LanguageSelectionPageConditionInterface extends ConditionInterface {
    */
   public function postConfigSave(array &$form, FormStateInterface $form_state);
 
+  /**
+   * Alter the $content render array used to build the LSP page.
+   *
+   * @param array &$content
+   *   The content render array.
+   */
+  public function alterPageContent(array &$content = array());
+
 }

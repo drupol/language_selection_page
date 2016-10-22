@@ -146,9 +146,7 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
     $current_path = $this->currentPath->getPath($this->requestStack->getCurrentRequest());
     $alias = $this->aliasManager->getAliasByPath($current_path);
     foreach ([$current_path, $alias] as $path) {
-      $path_elements = explode('/', trim($path, '/'));
-
-      if ($path_elements[0] === $configuration[$this->getPluginId()]) {
+      if ($path === $configuration[$this->getPluginId()]) {
         return $this->block();
       }
     }

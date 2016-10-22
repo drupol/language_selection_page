@@ -4,7 +4,9 @@ namespace Drupal\language_selection_page\Controller;
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Render\MainContent\MainContentRendererInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
@@ -47,6 +49,13 @@ class LanguageSelectionPageController extends ControllerBase {
   protected $linkGenerator;
 
   /**
+   * The Language Selection Page condition plugin manager.
+   *
+   * @var \Drupal\Core\Executable\ExecutableManagerInterface
+   */
+  protected static $languageSelectionPageConditionManager;
+
+  /**
    * PageController constructor.
    *
    * @param \Drupal\Core\Routing\RouteMatchInterface $current_route_match
@@ -55,12 +64,15 @@ class LanguageSelectionPageController extends ControllerBase {
    *   The main content renderer.
    * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
    *   The link generator service.
+   * @param \Drupal\Core\Executable\ExecutableManagerInterface $plugin_manager
+   *   The language selection page condition plugin manager.
    */
-  public function __construct(RouteMatchInterface $current_route_match, MainContentRendererInterface $main_content_renderer, RequestStack $request_stack, LinkGeneratorInterface $link_generator) {
+  public function __construct(RouteMatchInterface $current_route_match, MainContentRendererInterface $main_content_renderer, RequestStack $request_stack, LinkGeneratorInterface $link_generator, ExecutableManagerInterface $plugin_manager) {
     $this->currentRouteMatch = $current_route_match;
     $this->mainContentRenderer = $main_content_renderer;
     $this->requestStack = $request_stack;
     $this->linkGenerator = $link_generator;
+    self::$languageSelectionPageConditionManager = $plugin_manager;
   }
 
   /**
@@ -71,7 +83,8 @@ class LanguageSelectionPageController extends ControllerBase {
       $container->get('current_route_match'),
       $container->get('main_content_renderer.html'),
       $container->get('request_stack'),
-      $container->get('link_generator')
+      $container->get('link_generator'),
+      $container->get('plugin.manager.language_selection_page_condition')
     );
   }
 
@@ -147,22 +160,34 @@ class LanguageSelectionPageController extends ControllerBase {
       $links = [];
       foreach ($languages as $language) {
         $url = Url::fromUserInput($destination, ['language' => $language]);
-        $link = $link_generator->generate($language->getName(), $url);
-        $links[$language->getId()] = $link;
+        $project_link = Link::fromTextAndUrl($language->getName(), $url);
+        $project_link = $project_link->toRenderable();
+        $project_link['#attributes'] = array('class' => array('language_selection_page_link_' . $language->getId()));
+        $links[$language->getId()] = $project_link;
       }
     }
     catch (\InvalidArgumentException $exception) {
       return new RedirectResponse(Url::fromRoute('<front>')->setAbsolute()->toString());
     }
 
-    return [
-      '#theme' => 'language_selection_page_content',
-      '#destination' => $destination,
-      '#language_links' => [
-        '#theme' => 'item_list',
-        '#items' => $links,
+    $content = [
+      [
+        '#theme' => 'language_selection_page_content',
+        '#destination' => $destination,
+        '#language_links' => [
+          '#theme' => 'item_list',
+          '#items' => $links,
+        ],
       ],
     ];
+
+    // Alter the render array.
+    $manager = self::getPluginManager();
+    foreach ($manager->getDefinitions() as $def) {
+      $manager->createInstance($def['id'], $config->get())->alterPageContent($content);
+    }
+
+    return $content;
   }
 
   /**
@@ -185,6 +210,16 @@ class LanguageSelectionPageController extends ControllerBase {
     }
 
     return $response;
+  }
+
+  /**
+   * Get the plugin manager.
+   *
+   * @return \Drupal\Core\Executable\ExecutableManagerInterface
+   *   The Language Selection Page plugin manager.
+   */
+  public function getPluginManager() {
+    return self::$languageSelectionPageConditionManager;
   }
 
 }
