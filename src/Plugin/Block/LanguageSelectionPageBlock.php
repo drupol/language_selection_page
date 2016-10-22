@@ -98,7 +98,7 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
       $container->get('request_stack'),
       $container->get('plugin.manager.language_selection_page_condition'),
       $container->get('language_manager'),
-      $container->get('config_factory'),
+      $container->get('config.factory'),
       $container->get('link_generator')
     );
   }

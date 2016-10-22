@@ -4,7 +4,6 @@ namespace Drupal\language_selection_page\Controller;
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\MainContent\MainContentRendererInterface;
@@ -49,13 +48,6 @@ class LanguageSelectionPageController extends ControllerBase {
   protected $linkGenerator;
 
   /**
-   * The Language Selection Page condition plugin manager.
-   *
-   * @var \Drupal\Core\Executable\ExecutableManagerInterface
-   */
-  protected static $languageSelectionPageConditionManager;
-
-  /**
    * PageController constructor.
    *
    * @param \Drupal\Core\Routing\RouteMatchInterface $current_route_match
@@ -64,15 +56,12 @@ class LanguageSelectionPageController extends ControllerBase {
    *   The main content renderer.
    * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
    *   The link generator service.
-   * @param \Drupal\Core\Executable\ExecutableManagerInterface $plugin_manager
-   *   The language selection page condition plugin manager.
    */
-  public function __construct(RouteMatchInterface $current_route_match, MainContentRendererInterface $main_content_renderer, RequestStack $request_stack, LinkGeneratorInterface $link_generator, ExecutableManagerInterface $plugin_manager) {
+  public function __construct(RouteMatchInterface $current_route_match, MainContentRendererInterface $main_content_renderer, RequestStack $request_stack, LinkGeneratorInterface $link_generator) {
     $this->currentRouteMatch = $current_route_match;
     $this->mainContentRenderer = $main_content_renderer;
     $this->requestStack = $request_stack;
     $this->linkGenerator = $link_generator;
-    self::$languageSelectionPageConditionManager = $plugin_manager;
   }
 
   /**
@@ -83,8 +72,7 @@ class LanguageSelectionPageController extends ControllerBase {
       $container->get('current_route_match'),
       $container->get('main_content_renderer.html'),
       $container->get('request_stack'),
-      $container->get('link_generator'),
-      $container->get('plugin.manager.language_selection_page_condition')
+      $container->get('link_generator')
     );
   }
 
@@ -182,7 +170,7 @@ class LanguageSelectionPageController extends ControllerBase {
     ];
 
     // Alter the render array.
-    $manager = self::getPluginManager();
+    $manager = \Drupal::getContainer()->get('plugin.manager.language_selection_page_condition');
     foreach ($manager->getDefinitions() as $def) {
       $manager->createInstance($def['id'], $config->get())->alterPageContent($content);
     }
@@ -210,16 +198,6 @@ class LanguageSelectionPageController extends ControllerBase {
     }
 
     return $response;
-  }
-
-  /**
-   * Get the plugin manager.
-   *
-   * @return \Drupal\Core\Executable\ExecutableManagerInterface
-   *   The Language Selection Page plugin manager.
-   */
-  public function getPluginManager() {
-    return self::$languageSelectionPageConditionManager;
   }
 
 }
