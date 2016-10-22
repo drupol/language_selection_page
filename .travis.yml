@@ -42,7 +42,7 @@ env:
     # Simpletest specific commandline arguments, the DRUPAL_TI_SIMPLETEST_GROUP is appended at the end.
     - DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color --concurrency 4 --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT --module user"
 
-    - DRUPAL_TI_PHPUNIT_ARGS=""
+    - DRUPAL_TI_PHPUNIT_ARGS="--testsuite functional --group language_selection_page"
     - DRUPAL_TI_PHPUNIT_CORE_SRC_DIRECTORY="./tests/src"
     
     # This should be automatically set.
@@ -60,6 +60,8 @@ mysql:
   encoding: utf8
 
 before_install:
+  # Speed up builds by disabling xdebug
+  - phpenv config-rm xdebug.ini
   - composer self-update
   - composer global require drupal/coder
   - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
