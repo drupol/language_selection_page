@@ -147,8 +147,8 @@ class LanguageSelectionPageController extends ControllerBase {
       foreach ($language_manager->getNativeLanguages() as $language) {
         $url = Url::fromUserInput($destination, ['language' => $language]);
         $links_array[$language->getId()] = [
-          // We need to clone the $url object to avoid using the same one for all
-          // links. When the links are rendered, options are set on the $url
+          // We need to clone the $url object to avoid using the same one for
+          // all links. When the links are rendered, options are set on the $url
           // object, so if we use the same one, they would be set for all links.
           'url' => clone $url,
           'title' => $language->getName(),
