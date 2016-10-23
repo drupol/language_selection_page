@@ -6,13 +6,10 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Executable\ExecutableManagerInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Utility\LinkGeneratorInterface;
 use Drupal\language_selection_page\Controller\LanguageSelectionPageController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Provides a Language Selection Page block.
@@ -26,25 +23,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
    * The Language Selection Page condition plugin manager.
    *
    * @var \Drupal\Core\Executable\ExecutableManagerInterface
    */
   protected $languageSelectionPageConditionManager;
-
-  /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
 
   /**
    * The configuration factory.
@@ -54,11 +37,11 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
   protected $configFactory;
 
   /**
-   * The link generator.
+   * The page controller.
    *
-   * @var \Drupal\Core\Utility\LinkGeneratorInterface
+   * @var \Drupal\language_selection_page\Controller\LanguageSelectionPageController
    */
-  protected $linkGenerator;
+  protected $pageController;
 
   /**
    * LanguageSelectionPageBlock constructor.
@@ -71,20 +54,16 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
    *   The plugin implementation definition.
    * @param \Drupal\Core\Executable\ExecutableManagerInterface $plugin_manager
    *   The language selection page condition plugin manager.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   The language manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
-   * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
-   *   The link generator.
+   * @param \Drupal\language_selection_page\Controller\LanguageSelectionPageController $page_controller
+   *   The page controller.
    */
-  public function __construct($configuration, $plugin_id, $plugin_definition, RequestStack $request_stack, ExecutableManagerInterface $plugin_manager, LanguageManagerInterface $language_manager, ConfigFactoryInterface $config_factory, LinkGeneratorInterface $link_generator) {
+  public function __construct($configuration, $plugin_id, $plugin_definition, ExecutableManagerInterface $plugin_manager, ConfigFactoryInterface $config_factory, LanguageSelectionPageController $page_controller) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->requestStack = $request_stack;
     $this->languageSelectionPageConditionManager = $plugin_manager;
-    $this->languageManager = $language_manager;
     $this->configFactory = $config_factory;
-    $this->linkGenerator = $link_generator;
+    $this->pageController = $page_controller;
   }
 
   /**
@@ -95,11 +74,9 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('request_stack'),
       $container->get('plugin.manager.language_selection_page_condition'),
-      $container->get('language_manager'),
       $container->get('config.factory'),
-      $container->get('link_generator')
+      $container->get('language_selection_page_controller')
     );
   }
 
@@ -111,7 +88,8 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
     $content = NULL;
 
     if ('block' == $config->get('type')) {
-      $content = LanguageSelectionPageController::getContent($this->requestStack, $this->languageManager, $this->linkGenerator, $config);
+      $destination = $this->pageController->getDestination();
+      $content = $this->pageController->getPageContent($destination);
     }
 
     return is_array($content) ? $content : NULL;
@@ -129,7 +107,7 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
     });
 
     foreach ($defs as $def) {
-      /** @var ExecutableInterface $condition_plugin */
+      /** @var \Drupal\Core\Executable\ExecutableInterface $condition_plugin */
       $condition_plugin = $manager->createInstance($def['id'], $config->get());
       if (!$manager->execute($condition_plugin)) {
         return AccessResult::forbidden();
