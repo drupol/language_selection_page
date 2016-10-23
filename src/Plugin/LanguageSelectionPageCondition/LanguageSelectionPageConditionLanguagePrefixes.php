@@ -4,6 +4,8 @@ namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\language_selection_page\LanguageSelectionPageConditionBase;
 use Drupal\language_selection_page\LanguageSelectionPageConditionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -81,6 +83,55 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
     }
 
     return $this->pass();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterPageContent(array &$content = array(), $destination = '<front>') {
+    $links = [];
+
+    // As we are generating a URL from user input, we need to catch any
+    // exceptions thrown by invalid paths.
+    try {
+      // TODO: This variable will be used in the template.
+      // TODO: We still have to decide what to send in it, and how.
+      $links_array = [];
+      foreach ($this->languageManager->getNativeLanguages() as $language) {
+        $url = Url::fromUserInput($destination, ['language' => $language]);
+        $links_array[$language->getId()] = [
+          // We need to clone the $url object to avoid using the same one for
+          // all links. When the links are rendered, options are set on the $url
+          // object, so if we use the same one, they would be set for all links.
+          'url' => clone $url,
+          'title' => $language->getName(),
+          'language' => $language,
+          'attributes' => ['class' => ['language-link']],
+        ];
+      }
+
+      $languages = $this->languageManager->getLanguages();
+
+      foreach ($languages as $language) {
+        $url = Url::fromUserInput($destination, ['language' => $language]);
+        $project_link = Link::fromTextAndUrl($language->getName(), $url);
+        $project_link = $project_link->toRenderable();
+        $project_link['#attributes'] = array('class' => array('language_selection_page_link_' . $language->getId()));
+        $links[$language->getId()] = $project_link;
+      }
+    }
+    catch (\InvalidArgumentException $exception) {
+      $destination = '<front>';
+    }
+
+    $content[] = [
+      '#theme' => 'language_selection_page_content',
+      '#destination' => $destination,
+      '#language_links' => [
+        '#theme' => 'item_list',
+        '#items' => $links,
+      ],
+    ];
   }
 
 }

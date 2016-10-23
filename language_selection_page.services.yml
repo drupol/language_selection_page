@@ -7,3 +7,6 @@ services:
     arguments: ['@language_manager', '@config.factory', '@language_negotiator', '@path.current', '@plugin.manager.language_selection_page_condition']
     tags:
       - { name: 'event_subscriber' }
+  language_selection_page_controller:
+    class: \Drupal\language_selection_page\Controller\LanguageSelectionPageController
+    arguments: ['@current_route_match', '@main_content_renderer.html', '@request_stack', '@link_generator']

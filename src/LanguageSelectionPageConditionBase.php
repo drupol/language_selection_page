@@ -96,8 +96,22 @@ abstract class LanguageSelectionPageConditionBase extends ConditionPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function alterPageContent(array &$content = array()) {
+  public function alterPageContent(array &$content = array(), $destination = '<front>') {
 
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterPageResponse(&$content = array()) {
+
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDestination($destination) {
+    return $destination;
   }
 
 }

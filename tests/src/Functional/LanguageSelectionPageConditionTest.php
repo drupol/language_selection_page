@@ -36,6 +36,13 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
   protected $profile = 'standard';
 
   /**
+   * Hold the original configuration of LSP.
+   *
+   * @var array
+   */
+  protected $configOriginal;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -58,6 +65,60 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     ], 'Save settings');
     // Turn on content translation for pages.
     $this->drupalPostform('admin/structure/types/manage/page', ['language_configuration[content_translation]' => 1], 'Save content type');
+
+    $this->configOriginal = $this->config('language_selection_page.negotiation')->get();
+  }
+
+  /**
+   * Reset the configuration to the initial state.
+   */
+  protected function resetConfiguration() {
+    $this->config('language_selection_page.negotiation')
+      ->setData($this->configOriginal)
+      ->save();
+  }
+
+  /**
+   * Assert that the language selection page is loaded.
+   */
+  protected function assertLanguageSelectionPageLoaded() {
+    $this->assertSession()->pageTextContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+  }
+
+  /**
+   * Assert that the language selection page is not loaded.
+   */
+  protected function assertLanguageSelectionPageNotLoaded() {
+    $this->assertSession()->pageTextNotContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+  }
+
+  /**
+   * Test the "language prefixes" condition.
+   */
+  public function testEnabledLanguages() {
+    $node = $this->drupalCreateNode();
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageLoaded();
+
+    // Set prefixes to fr only.
+    $this->drupalPostForm('admin/config/regional/language/detection/url', [
+      'prefix[en]' => '',
+      'prefix[fr]' => 'fr',
+    ], 'Save configuration');
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageNotLoaded();
+    $this->drupalGet('admin/reports/status');
+    // Look for "You should add a path prefix to English language if you want
+    // to have it enabled in the Language Selection Page.".
+    $this->assertSession()->pageTextContains('language if you want to have it enabled in the Language Selection Page');
+    $this->drupalPostForm('admin/config/regional/language/detection/url', [
+      'prefix[en]' => 'en',
+      'prefix[fr]' => 'fr',
+    ], 'Save configuration');
+    $this->drupalGet('admin/reports/status');
+    $this->assertSession()->pageTextNotContains('language if you want to have it enabled in the Language Selection Page');
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -94,6 +155,8 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['ignore_neutral' => 0], 'Save configuration');
     $this->drupalGet('node/' . $untranslatable_node1->id());
     $this->assertLanguageSelectionPageLoaded();
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -109,6 +172,8 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id());
     $this->assertLanguageSelectionPageLoaded();
     $this->assertSession()->responseContains('<title>' . $title);
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -163,6 +228,8 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '<front>'], 'Save configuration');
     $this->drupalGet('<front>');
     $this->assertLanguageSelectionPageNotLoaded();
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -190,6 +257,8 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id());
     $this->assertLanguageSelectionPageNotLoaded();
      */
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -204,6 +273,8 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id(), array(), $headers);
     // @todo fix this test.
     $this->assertLanguageSelectionPageNotLoaded();
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -225,63 +296,31 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->assertLanguageSelectionPageLoaded();
 
     // Ensure we are on a blacklisted path.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/node/' . $node->id()], 'Save configuration');
+    $blacklisted_paths = implode(PHP_EOL, [
+      '/admin',
+      '/admin/*',
+      '/admin*',
+      '/node/' . $node->id(),
+    ]);
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => $blacklisted_paths], 'Save configuration');
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->pageTextNotContains('Language Selection Page block');
     $this->assertLanguageSelectionPageNotLoaded();
+    $this->resetConfiguration();
 
     // Test template only.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['type' => 'standalone'], 'Save configuration');
+    $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['type' => 'standalone'], 'Save configuration');
     $this->drupalGet('node/' . $node->id());
     $this->assertLanguageSelectionPageLoaded();
     $this->assertSession()->responseNotContains('<h2>Search</h2>');
 
     // Test template in theme.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['type' => 'embedded'], 'Save configuration');
+    $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['type' => 'embedded'], 'Save configuration');
     $this->drupalGet('node/' . $node->id());
     $this->assertLanguageSelectionPageLoaded();
     $this->assertSession()->responseContains('<h2>Search</h2>');
-  }
 
-  /**
-   * Test the "language prefixes" condition.
-   */
-  public function testEnabledLanguages() {
-    $node = $this->drupalCreateNode();
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageLoaded();
-
-    // Set prefixes to fr only.
-    $this->drupalPostForm('admin/config/regional/language/detection/url', [
-      'prefix[en]' => '',
-      'prefix[fr]' => 'fr',
-    ], 'Save configuration');
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageNotLoaded();
-    $this->drupalGet('admin/reports/status');
-    // Look for "You should add a path prefix to English language if you want
-    // to have it enabled in the Language Selection Page.".
-    $this->assertSession()->pageTextContains('language if you want to have it enabled in the Language Selection Page');
-    $this->drupalPostForm('admin/config/regional/language/detection/url', [
-      'prefix[en]' => 'en',
-      'prefix[fr]' => 'fr',
-    ], 'Save configuration');
-    $this->drupalGet('admin/reports/status');
-    $this->assertSession()->pageTextNotContains('language if you want to have it enabled in the Language Selection Page');
-  }
-
-  /**
-   * Assert that the language selection page is loaded.
-   */
-  protected function assertLanguageSelectionPageLoaded() {
-    $this->assertSession()->pageTextContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
-  }
-
-  /**
-   * Assert that the language selection page is not loaded.
-   */
-  protected function assertLanguageSelectionPageNotLoaded() {
-    $this->assertSession()->pageTextNotContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+    $this->resetConfiguration();
   }
 
 }

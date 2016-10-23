@@ -85,7 +85,31 @@ interface LanguageSelectionPageConditionInterface extends ConditionInterface {
    *
    * @param array &$content
    *   The content render array.
+   * @param string $destination
+   *   The destination path.
    */
-  public function alterPageContent(array &$content = array());
+  public function alterPageContent(array &$content = array(), $destination = '<front>');
+
+  /**
+   * Alter the page response.
+   *
+   * @param array|\Symfony\Component\HttpFoundation\Response $content
+   *   The render array or a response.
+   *
+   * @return array|\Symfony\Component\HttpFoundation\Response
+   *   Returns a render array or a response.
+   */
+  public function alterPageResponse(&$content = array());
+
+  /**
+   * Find the destination to redirect the user to after choosing the language.
+   *
+   * @param string $destination
+   *   The destination.
+   *
+   * @return string
+   *   The destination.
+   */
+  public function getDestination($destination);
 
 }
