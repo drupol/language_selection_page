@@ -297,15 +297,16 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
 
     // Ensure we are on a blacklisted path.
     $blacklisted_paths = implode(PHP_EOL, [
-      'admin',
-      'admin/*',
-      'admin*',
+      '/admin',
+      '/admin/*',
+      '/admin*',
       '/node/' . $node->id(),
     ]);
     $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => $blacklisted_paths], 'Save configuration');
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->pageTextNotContains('Language Selection Page block');
     $this->assertLanguageSelectionPageNotLoaded();
+    $this->resetConfiguration();
 
     // Test template only.
     $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['type' => 'standalone'], 'Save configuration');
