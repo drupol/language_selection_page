@@ -96,7 +96,7 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
-    /** @var LanguageSelectionPageConditionInterface $condition */
+    /** @var \Drupal\language_selection_page\LanguageSelectionPageConditionInterface $condition */
     foreach ($form_state->get(['conditions']) as $condition) {
       $condition->validateConfigurationForm($form, $form_state);
     }
@@ -108,7 +108,7 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    /** @var LanguageSelectionPageConditionInterface $condition */
+    /** @var \Drupal\language_selection_page\LanguageSelectionPageConditionInterface $condition */
     foreach ($form_state->get(['conditions']) as $condition) {
       $condition->submitConfigurationForm($form, $form_state);
       if (isset($condition->getConfiguration()[$condition->getPluginId()])) {
@@ -119,11 +119,15 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
 
     $this->config->save();
 
-    /** @var LanguageSelectionPageConditionInterface $condition */
+    /** @var \Drupal\language_selection_page\LanguageSelectionPageConditionInterface $condition */
     foreach ($form_state->get(['conditions']) as $condition) {
       $condition->postConfigSave($form, $form_state);
     }
 
+    // Redirect to the language negotiation page on submit (previous Drupal 7
+    // behavior, and intended behavior for other language negotiation settings
+    // forms in Drupal 8 core).
+    $form_state->setRedirect('language.negotiation');
   }
 
 }
