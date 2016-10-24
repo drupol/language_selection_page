@@ -81,3 +81,6 @@ script:
 
 after_script:
   - drupal-ti after_script
+
+after_success:
+  - coveralls
