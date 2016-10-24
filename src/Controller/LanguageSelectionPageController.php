@@ -3,13 +3,41 @@
 namespace Drupal\language_selection_page\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class LanguageSelectionPageController.
  */
 class LanguageSelectionPageController extends ControllerBase {
+
+  /**
+   * The plugin manager.
+   *
+   * @var \Drupal\Core\Executable\ExecutableManagerInterface
+   */
+  protected $pluginManager;
+
+  /**
+   * PageController constructor.
+   *
+   * @param \Drupal\Core\Executable\ExecutableManagerInterface $plugin_manager
+   *   The plugin manager service.
+   */
+  public function __construct(ExecutableManagerInterface $plugin_manager) {
+    $this->pluginManager = $plugin_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('plugin.manager.language_selection_page_condition')
+    );
+  }
 
   /**
    * Get the content of the Language Selection Page.
@@ -27,9 +55,8 @@ class LanguageSelectionPageController extends ControllerBase {
     $content = [];
 
     // Alter the render array.
-    $manager = \Drupal::getContainer()->get('plugin.manager.language_selection_page_condition');
-    foreach ($manager->getDefinitions() as $def) {
-      $manager->createInstance($def['id'], $config->get())->alterPageContent($content, $destination);
+    foreach ($this->pluginManager->getDefinitions() as $def) {
+      $this->pluginManager->createInstance($def['id'], $config->get())->alterPageContent($content, $destination);
     }
 
     return $content;
@@ -47,10 +74,8 @@ class LanguageSelectionPageController extends ControllerBase {
   public function getPageResponse($response) {
     $config = $this->config('language_selection_page.negotiation');
 
-    // Alter the render array.
-    $manager = \Drupal::getContainer()->get('plugin.manager.language_selection_page_condition');
-    foreach ($manager->getDefinitions() as $def) {
-      $manager->createInstance($def['id'], $config->get())->alterPageResponse($response);
+    foreach ($this->pluginManager->getDefinitions() as $def) {
+      $this->pluginManager->createInstance($def['id'], $config->get())->alterPageResponse($response);
     }
 
     return $response;
@@ -70,9 +95,8 @@ class LanguageSelectionPageController extends ControllerBase {
   public function getDestination($destination = NULL) {
     $config = $this->config('language_selection_page.negotiation');
 
-    $manager = \Drupal::getContainer()->get('plugin.manager.language_selection_page_condition');
-    foreach ($manager->getDefinitions() as $def) {
-      $destination = $manager->createInstance($def['id'], $config->get())->getDestination($destination);
+    foreach ($this->pluginManager->getDefinitions() as $def) {
+      $destination = $this->pluginManager->createInstance($def['id'], $config->get())->getDestination($destination);
     }
 
     return $destination;
