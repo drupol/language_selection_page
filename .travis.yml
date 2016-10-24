@@ -44,6 +44,8 @@ env:
 
     - DRUPAL_TI_PHPUNIT_ARGS="--testsuite functional --group language_selection_page"
     - DRUPAL_TI_PHPUNIT_CORE_SRC_DIRECTORY="./tests/src"
+
+    - DRUPAL_TI_COVERAGE="satooshi/php-coveralls:0.6.*"
     - DRUPAL_TI_COVERAGE_FILE="build/logs/clover.xml"
     
     # This should be automatically set.
@@ -65,7 +67,6 @@ before_install:
   - phpenv config-rm xdebug.ini
   - composer self-update
   - composer global require drupal/coder
-  - composer global require satooshi/php-coveralls
   - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
   - phpcs --report=full --standard=Drupal $TRAVIS_BUILD_DIR
   - composer global require "LionsAd/drupal_ti:dev-master"
@@ -83,6 +84,3 @@ script:
 
 after_script:
   - drupal-ti after_script
-
-after_success:
-  - coveralls
