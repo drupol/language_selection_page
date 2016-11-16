@@ -2,15 +2,22 @@
 
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\MainContent\MainContentRendererInterface;
+use Drupal\Core\Render\RenderCacheInterface;
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\language_selection_page\LanguageSelectionPageConditionBase;
 use Drupal\language_selection_page\LanguageSelectionPageConditionInterface;
+use Drupal\rest\ResourceResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class for the Type condition plugin.
@@ -147,20 +154,6 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
         '#title' => $config->get('title'),
         'content' => $content,
       ];
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterPageResponse(&$content = array()) {
-    // TODO: update this using the config passed to the plugin.
-    $config = $this->configFactory->get('language_selection_page.negotiation');
-
-    // Render the page if we have an array in $content instead of a
-    // RedirectResponse. Otherwise, redirect the user.
-    if ('standalone' == $config->get('type')) {
-      $content = $this->mainContentRenderer->renderResponse($content, $this->requestStack->getCurrentRequest(), $this->currentRouteMatch);
     }
   }
 
