@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_theme().
@@ -23,4 +24,25 @@ function language_selection_page_theme($existing, $type, $theme, $path) {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_help().
+ */
+function language_selection_page_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the gss module.
+    case 'help.page.language_selection_page':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This module allows you to present visitors of your website with a landingpage / splash page where they can select the language of their choice, based on the languages that have been enabled on your Drupal site.</br>For more information please visit the <a href="@link">module page</a>.', array('@link' => 'https://www.drupal.org/project/language_selection_page')) . '</p>';
+      $output .= '<h3>' . t('Configuring') . '</h3>';
+      $output .= '<p>' . t('Go to admin/config/regional/language/configure to configure language detection and selection</br>- enable the "Selection Page" detection method</br>- it is recommended to position this method near the bottom, just above "Default".') . '</p>';
+      $output .= '<h3>' . t('Theming') . '</h3>';
+      $output .= '<p>' . t('Customize the template by copying the .tpl.php file to your current theme directory.</br>If you selected "Template in theme", you might want to add a page--languageselection.tpl.php file to your theme, that removes any sidebars or regions that could intervene with the language selection task.') . '</p>';
+      return $output;
+
+    default:
+      return '';
+  }
 }
