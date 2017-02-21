@@ -110,9 +110,7 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
         ];
       }
 
-      $languages = $this->languageManager->getLanguages();
-
-      foreach ($languages as $language) {
+      foreach ($this->languageManager->getNativeLanguages() as $language) {
         $url = Url::fromUserInput($destination, ['language' => $language]);
         $project_link = Link::fromTextAndUrl($language->getName(), $url);
         $project_link = $project_link->toRenderable();
