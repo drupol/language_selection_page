@@ -129,9 +129,6 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
         '#theme' => 'item_list',
         '#items' => $links,
       ],
-      '#cache' => [
-        'contexts' => ['url']
-      ],
     ];
   }
 
