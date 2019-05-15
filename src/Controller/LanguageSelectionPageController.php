@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -40,6 +42,27 @@ class LanguageSelectionPageController extends ControllerBase {
   }
 
   /**
+   * Get the destination.
+   *
+   * Loop through each plugins to find it.
+   *
+   * @param string $destination
+   *   The destination.
+   *
+   * @return string
+   *   The destination.
+   */
+  public function getDestination($destination = NULL) {
+    $config = $this->config('language_selection_page.negotiation');
+
+    foreach ($this->pluginManager->getDefinitions() as $def) {
+      $destination = $this->pluginManager->createInstance($def['id'], $config->get())->getDestination($destination);
+    }
+
+    return $destination;
+  }
+
+  /**
    * Get the content of the Language Selection Page.
    *
    * Method used in LanguageSelectionPageController::main().
@@ -71,7 +94,7 @@ class LanguageSelectionPageController extends ControllerBase {
    * @return \Symfony\Component\HttpFoundation\Response|array
    *   A response or a render array.
    */
-  public function getPageResponse($response) {
+  public function getPageResponse(array $response) {
     $config = $this->config('language_selection_page.negotiation');
 
     foreach ($this->pluginManager->getDefinitions() as $def) {
@@ -79,27 +102,6 @@ class LanguageSelectionPageController extends ControllerBase {
     }
 
     return $response;
-  }
-
-  /**
-   * Get the destination.
-   *
-   * Loop through each plugins to find it.
-   *
-   * @param string $destination
-   *   The destination.
-   *
-   * @return string
-   *   The destination.
-   */
-  public function getDestination($destination = NULL) {
-    $config = $this->config('language_selection_page.negotiation');
-
-    foreach ($this->pluginManager->getDefinitions() as $def) {
-      $destination = $this->pluginManager->createInstance($def['id'], $config->get())->getDestination($destination);
-    }
-
-    return $destination;
   }
 
   /**
@@ -112,7 +114,7 @@ class LanguageSelectionPageController extends ControllerBase {
     // Check $destination is valid.
     // If the path is set to $destination, redirect the user to the
     // front page to avoid infinite loops.
-    if (empty($destination) || (trim($destination, '/') == trim($config->get('path'), '/'))) {
+    if (empty($destination) || (trim($destination, '/') === trim($config->get('path'), '/'))) {
       return new RedirectResponse(Url::fromRoute('<front>')->setAbsolute()->toString());
     }
 

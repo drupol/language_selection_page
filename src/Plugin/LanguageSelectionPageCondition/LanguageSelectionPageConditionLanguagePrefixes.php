@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -24,18 +26,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {
 
   /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
+
+  /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
 
   /**
    * Constructs a LanguageSelectionPageConditionLanguagePrefixes plugin.
@@ -60,35 +62,7 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $container->get('language_manager'),
-      $container->get('config.factory'),
-      $configuration,
-      $plugin_id,
-      $plugin_definition
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function evaluate() {
-    $languages = $this->languageManager->getNativeLanguages();
-    $language_negotiation_config = $this->configFactory->get('language.negotiation')->get('url');
-    $prefixes = array_filter($language_negotiation_config['prefixes']);
-
-    if (count($languages) != count($prefixes)) {
-      return $this->block();
-    }
-
-    return $this->pass();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterPageContent(array &$content = array(), $destination = '<front>') {
+  public function alterPageContent(array &$content = [], $destination = '<front>') {
     $links = [];
 
     // As we are generating a URL from user input, we need to catch any
@@ -114,7 +88,7 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
         $url = Url::fromUserInput($destination, ['language' => $language]);
         $project_link = Link::fromTextAndUrl($language->getName(), $url);
         $project_link = $project_link->toRenderable();
-        $project_link['#attributes'] = array('class' => array('language_selection_page_link_' . $language->getId()));
+        $project_link['#attributes'] = ['class' => ['language_selection_page_link_' . $language->getId()]];
         $links[$language->getId()] = $project_link;
       }
     }
@@ -130,6 +104,34 @@ class LanguageSelectionPageConditionLanguagePrefixes extends LanguageSelectionPa
         '#items' => $links,
       ],
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $container->get('language_manager'),
+      $container->get('config.factory'),
+      $configuration,
+      $plugin_id,
+      $plugin_definition
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function evaluate() {
+    $languages = $this->languageManager->getNativeLanguages();
+    $language_negotiation_config = $this->configFactory->get('language.negotiation')->get('url');
+    $prefixes = array_filter($language_negotiation_config['prefixes']);
+
+    if (count($languages) !== count($prefixes)) {
+      return $this->block();
+    }
+
+    return $this->pass();
   }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Annotation;
 
 use Drupal\Core\Condition\Annotation\Condition;
@@ -16,18 +18,20 @@ use Drupal\Core\Condition\Annotation\Condition;
 class LanguageSelectionPageCondition extends Condition {
 
   /**
+   * The description of the language selection page condition plugin.
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
+   */
+  public $description;
+
+  /**
    * The language selection page condition plugin ID.
    *
    * @var string
    */
   public $id;
-
-  /**
-   * The default weight of the language selection page condition plugin.
-   *
-   * @var int
-   */
-  public $weight;
 
   /**
    * The human-readable name of the language selection page condition plugin.
@@ -37,15 +41,6 @@ class LanguageSelectionPageCondition extends Condition {
    * @ingroup plugin_translatable
    */
   public $name;
-
-  /**
-   * The description of the language selection page condition plugin.
-   *
-   * @var \Drupal\Core\Annotation\Translation
-   *
-   * @ingroup plugin_translatable
-   */
-  public $description;
 
   /**
    * Whether to apply the plugin to the Language selection page block.
@@ -60,5 +55,12 @@ class LanguageSelectionPageCondition extends Condition {
    * @see \Drupal\language_selection_page\Plugin\Block\LanguageSelectionPageBlock::blockAccess()
    */
   public $runInBlock;
+
+  /**
+   * The default weight of the language selection page condition plugin.
+   *
+   * @var int
+   */
+  public $weight;
 
 }

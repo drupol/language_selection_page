@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Controller;
 
 use Drupal\Core\Controller\ControllerBase;

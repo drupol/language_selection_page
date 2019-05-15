@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\language_selection_page\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -29,18 +31,18 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
   ];
 
   /**
-   * Use the standard profile.
-   *
-   * @var string
-   */
-  protected $profile = 'standard';
-
-  /**
    * Hold the original configuration of LSP.
    *
    * @var array
    */
   protected $configOriginal;
+
+  /**
+   * Use the standard profile.
+   *
+   * @var string
+   */
+  protected $profile = 'standard';
 
   /**
    * {@inheritdoc}
@@ -70,26 +72,75 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
   }
 
   /**
-   * Reset the configuration to the initial state.
+   * Test the "xml_http_request" condition.
    */
-  protected function resetConfiguration() {
-    $this->config('language_selection_page.negotiation')
-      ->setData($this->configOriginal)
-      ->save();
+  public function testAjax() {
+    $node = $this->drupalCreateNode();
+    $headers = [];
+    $this->drupalGet('node/' . $node->id(), [], $headers);
+    $this->assertLanguageSelectionPageLoaded();
+    $headers['X-Requested-With'] = 'XMLHttpRequest';
+    $this->drupalGet('node/' . $node->id(), [], $headers);
+    // @todo fix this test.
+    $this->assertLanguageSelectionPageNotLoaded();
+
+    $this->resetConfiguration();
   }
 
   /**
-   * Assert that the language selection page is loaded.
+   * Test the "Blacklisted paths" condition.
    */
-  protected function assertLanguageSelectionPageLoaded() {
-    $this->assertSession()->pageTextContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
-  }
+  public function testBlackListedPaths() {
+    $this->drupalGet('admin/config/regional/language/detection/language_selection_page');
+    $this->assertSession()->responseContains('/node/add/*');
+    $this->assertSession()->responseContains('/node/*/edit');
+    $node = $this->drupalCreateNode(['langcode' => 'fr']);
 
-  /**
-   * Assert that the language selection page is not loaded.
-   */
-  protected function assertLanguageSelectionPageNotLoaded() {
-    $this->assertSession()->pageTextNotContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageLoaded();
+
+    // Add node to blacklisted paths.
+    $blacklisted_paths = '/admin/*' . PHP_EOL . '/node/' . $node->id();
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page',
+      [
+        'blacklisted_paths' => $blacklisted_paths,
+      ],
+      'Save configuration');
+
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageNotLoaded();
+
+    // Add node to blacklisted paths (in the middle).
+    $blacklisted_paths = '/admin/*' . PHP_EOL . '/node/' . $node->id() . PHP_EOL . '/bar';
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page',
+      [
+        'blacklisted_paths' => $blacklisted_paths,
+      ],
+      'Save configuration');
+    $this->drupalGet('node/' . $node->id());
+    // @todo fix this test
+    $this->assertLanguageSelectionPageNotLoaded();
+
+    // Add string that contains node, but not node itself.
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '/node/' . $node->id() . '/foobar' . PHP_EOL . '/bar'], 'Save configuration');
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageLoaded();
+
+    // Add string that starts with node, but not node itself.
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '/node/' . $node->id() . '/foobar'], 'Save configuration');
+    $this->drupalGet('node/' . $node->id());
+    $this->assertLanguageSelectionPageLoaded();
+
+    // Test front page.
+    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*'], 'Save configuration');
+    $this->drupalGet('<front>');
+    $this->assertLanguageSelectionPageLoaded();
+
+    $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '<front>'], 'Save configuration');
+    $this->drupalGet('<front>');
+    $this->assertLanguageSelectionPageNotLoaded();
+
+    $this->resetConfiguration();
   }
 
   /**
@@ -177,62 +228,6 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
   }
 
   /**
-   * Test the "Blacklisted paths" condition.
-   */
-  public function testBlackListedPaths() {
-    $this->drupalGet('admin/config/regional/language/detection/language_selection_page');
-    $this->assertSession()->responseContains('/node/add/*');
-    $this->assertSession()->responseContains('/node/*/edit');
-    $node = $this->drupalCreateNode(['langcode' => 'fr']);
-
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageLoaded();
-
-    // Add node to blacklisted paths.
-    $blacklisted_paths = '/admin/*' . PHP_EOL . '/node/' . $node->id();
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page',
-      [
-        'blacklisted_paths' => $blacklisted_paths,
-      ],
-      'Save configuration');
-
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageNotLoaded();
-
-    // Add node to blacklisted paths (in the middle).
-    $blacklisted_paths = '/admin/*' . PHP_EOL . '/node/' . $node->id() . PHP_EOL . '/bar';
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page',
-      [
-        'blacklisted_paths' => $blacklisted_paths,
-      ],
-      'Save configuration');
-    $this->drupalGet('node/' . $node->id());
-    // @todo fix this test
-    $this->assertLanguageSelectionPageNotLoaded();
-
-    // Add string that contains node, but not node itself.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '/node/' . $node->id() . '/foobar' . PHP_EOL . '/bar'], 'Save configuration');
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageLoaded();
-
-    // Add string that starts with node, but not node itself.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '/node/' . $node->id() . '/foobar'], 'Save configuration');
-    $this->drupalGet('node/' . $node->id());
-    $this->assertLanguageSelectionPageLoaded();
-
-    // Test front page.
-    $this->drupalPostForm('admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*'], 'Save configuration');
-    $this->drupalGet('<front>');
-    $this->assertLanguageSelectionPageLoaded();
-
-    $this->drupalPostForm('en/admin/config/regional/language/detection/language_selection_page', ['blacklisted_paths' => '/admin/*' . PHP_EOL . '<front>'], 'Save configuration');
-    $this->drupalGet('<front>');
-    $this->assertLanguageSelectionPageNotLoaded();
-
-    $this->resetConfiguration();
-  }
-
-  /**
    * Test the "path" condition.
    */
   public function testPath() {
@@ -257,22 +252,6 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->drupalGet('node/' . $node->id());
     $this->assertLanguageSelectionPageNotLoaded();
      */
-
-    $this->resetConfiguration();
-  }
-
-  /**
-   * Test the "xml_http_request" condition.
-   */
-  public function testAjax() {
-    $node = $this->drupalCreateNode();
-    $headers = [];
-    $this->drupalGet('node/' . $node->id(), array(), $headers);
-    $this->assertLanguageSelectionPageLoaded();
-    $headers['X-Requested-With'] = 'XMLHttpRequest';
-    $this->drupalGet('node/' . $node->id(), array(), $headers);
-    // @todo fix this test.
-    $this->assertLanguageSelectionPageNotLoaded();
 
     $this->resetConfiguration();
   }
@@ -321,6 +300,29 @@ class LanguageSelectionPageConditionTest extends BrowserTestBase {
     $this->assertSession()->responseContains('<h2>Search</h2>');
 
     $this->resetConfiguration();
+  }
+
+  /**
+   * Assert that the language selection page is loaded.
+   */
+  protected function assertLanguageSelectionPageLoaded() {
+    $this->assertSession()->pageTextContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+  }
+
+  /**
+   * Assert that the language selection page is not loaded.
+   */
+  protected function assertLanguageSelectionPageNotLoaded() {
+    $this->assertSession()->pageTextNotContains(self::LANGUAGE_SELECTION_PAGE_TEXT);
+  }
+
+  /**
+   * Reset the configuration to the initial state.
+   */
+  protected function resetConfiguration() {
+    $this->config('language_selection_page.negotiation')
+      ->setData($this->configOriginal)
+      ->save();
   }
 
 }

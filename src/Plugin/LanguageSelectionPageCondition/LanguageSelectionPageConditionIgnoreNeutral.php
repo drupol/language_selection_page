@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -49,6 +51,20 @@ class LanguageSelectionPageConditionIgnoreNeutral extends LanguageSelectionPageC
   /**
    * {@inheritdoc}
    */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form[$this->getPluginId()] = [
+      '#title' => $this->t('Ignore untranslatable (language neutral) entities.'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->configuration[$this->getPluginId()],
+      '#description' => $this->t('Do not redirect to the language selection page if the entity on the page being viewed is not translatable (such as when it is language neutral, or if the content type it belongs to is not translatable).'),
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $container->get('current_route_match'),
@@ -78,20 +94,6 @@ class LanguageSelectionPageConditionIgnoreNeutral extends LanguageSelectionPageC
     }
 
     return $this->pass();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form[$this->getPluginId()] = [
-      '#title' => $this->t('Ignore untranslatable (language neutral) entities.'),
-      '#type' => 'checkbox',
-      '#default_value' => $this->configuration[$this->getPluginId()],
-      '#description' => $this->t('Do not redirect to the language selection page if the entity on the page being viewed is not translatable (such as when it is language neutral, or if the content type it belongs to is not translatable).'),
-    ];
-
-    return $form;
   }
 
   /**

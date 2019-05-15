@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page;
 
 use Drupal\Core\Condition\ConditionInterface;
@@ -22,8 +24,59 @@ abstract class LanguageSelectionPageConditionBase extends ConditionPluginBase im
   /**
    * {@inheritdoc}
    */
+  public function alterPageContent(array &$content = [], $destination = '<front>') {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterPageResponse(&$content = []) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function block() {
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function evaluate() {
+    return $this->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    $definition = $this->getPluginDefinition();
+
+    return !empty($definition['description']) ? $definition['description'] : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDestination($destination) {
+    return $destination;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getName() {
+    $definition = $this->getPluginDefinition();
+
+    return !empty($definition['name']) ? $definition['name'] : $this->getPluginId();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getWeight() {
+    return !empty($this->weight) ? $this->weight : 0;
   }
 
   /**
@@ -36,8 +89,16 @@ abstract class LanguageSelectionPageConditionBase extends ConditionPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function summary() {
-    // This should return a summary but it's not used in our case.
+  public function postConfigSave(array &$form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    $this->weight = $weight;
+
+    return $this;
   }
 
   /**
@@ -51,67 +112,8 @@ abstract class LanguageSelectionPageConditionBase extends ConditionPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function getName() {
-    $definition = $this->getPluginDefinition();
-    return !empty($definition['name']) ? $definition['name'] : $this->getPluginId();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDescription() {
-    $definition = $this->getPluginDefinition();
-    return !empty($definition['description']) ? $definition['description'] : NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setWeight($weight) {
-    $this->weight = $weight;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getWeight() {
-    return !empty($this->weight) ? $this->weight : 0;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function evaluate() {
-    return $this->execute();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function postConfigSave(array &$form, FormStateInterface $form_state) {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterPageContent(array &$content = array(), $destination = '<front>') {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function alterPageResponse(&$content = array()) {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDestination($destination) {
-    return $destination;
+  public function summary() {
+    // This should return a summary but it's not used in our case.
   }
 
 }

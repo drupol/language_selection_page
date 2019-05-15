@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\Block;
 
 use Drupal\Core\Access\AccessResult;
@@ -23,18 +25,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The Language Selection Page condition plugin manager.
-   *
-   * @var \Drupal\Core\Executable\ExecutableManagerInterface
-   */
-  protected $languageSelectionPageConditionManager;
-
-  /**
    * The configuration factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
+
+  /**
+   * The Language Selection Page condition plugin manager.
+   *
+   * @var \Drupal\Core\Executable\ExecutableManagerInterface
+   */
+  protected $languageSelectionPageConditionManager;
 
   /**
    * The page controller.
@@ -59,11 +61,26 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
    * @param \Drupal\language_selection_page\Controller\LanguageSelectionPageController $page_controller
    *   The page controller.
    */
-  public function __construct($configuration, $plugin_id, $plugin_definition, ExecutableManagerInterface $plugin_manager, ConfigFactoryInterface $config_factory, LanguageSelectionPageController $page_controller) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, ExecutableManagerInterface $plugin_manager, ConfigFactoryInterface $config_factory, LanguageSelectionPageController $page_controller) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->languageSelectionPageConditionManager = $plugin_manager;
     $this->configFactory = $config_factory;
     $this->pageController = $page_controller;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build() {
+    $config = $this->configFactory->get('language_selection_page.negotiation');
+    $content = NULL;
+
+    if ($config->get('type') === 'block') {
+      $destination = $this->pageController->getDestination();
+      $content = $this->pageController->getPageContent($destination);
+    }
+
+    return is_array($content) ? $content : NULL;
   }
 
   /**
@@ -78,21 +95,6 @@ class LanguageSelectionPageBlock extends BlockBase implements ContainerFactoryPl
       $container->get('config.factory'),
       $container->get('language_selection_page_controller')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function build() {
-    $config = $this->configFactory->get('language_selection_page.negotiation');
-    $content = NULL;
-
-    if ('block' == $config->get('type')) {
-      $destination = $this->pageController->getDestination();
-      $content = $this->pageController->getPageContent($destination);
-    }
-
-    return is_array($content) ? $content : NULL;
   }
 
   /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -28,39 +30,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {
 
   /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
    * An alias manager to find the alias for the current system path.
    *
    * @var \Drupal\Core\Path\AliasManagerInterface
    */
   protected $aliasManager;
-
-  /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
-   * The current path.
-   *
-   * @var \Drupal\Core\Path\CurrentPathStack
-   */
-  protected $currentPath;
-
-  /**
-   * The route builder service.
-   *
-   * @var \Drupal\Core\Routing\RouteBuilderInterface
-   */
-  protected $routeBuilder;
 
   /**
    * The instantiated Cache backend.
@@ -70,11 +44,39 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
   protected $cacheConfig;
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The current path.
+   *
+   * @var \Drupal\Core\Path\CurrentPathStack
+   */
+  protected $currentPath;
+
+  /**
    * The path validator.
    *
    * @var \Drupal\Core\Path\PathValidatorInterface
    */
   protected $pathValidator;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * The route builder service.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected $routeBuilder;
 
   /**
    * Constructs a LanguageSelectionPageConditionPath plugin.
@@ -114,6 +116,24 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
   /**
    * {@inheritdoc}
    */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    global $base_url;
+
+    $form[$this->getPluginId()] = [
+      '#type' => 'textfield',
+      '#default_value' => $this->configuration[$this->getPluginId()],
+      '#description' => t('The path of the page displaying the Language Selection Page'),
+      '#required' => TRUE,
+      '#size' => 40,
+      '#field_prefix' => $base_url,
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $container->get('config.factory'),
@@ -136,10 +156,11 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
     $configuration_lsp = $this->configFactory->getEditable('language_selection_page.negotiation');
     $system_site = $this->configFactory->getEditable('system.site');
 
-    if ($configuration['path'] == $system_site->get('page.front')) {
+    if ($configuration['path'] === $system_site->get('page.front')) {
       $configuration_lsp->set('path', '/language_selection_page')->save();
       $system_site->set('page.front', '/node')->save();
       drupal_set_message($this->t('The Language Selection Page cannot be used as frontpage. To avoid infinite redirect loops, the language selection page path has been reset to <strong>/language_selection_page</strong> and the default frontpage setting has been reset to <strong>/node</strong>.'), 'error');
+
       return $this->block();
     }
 
@@ -157,19 +178,19 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    global $base_url;
+  public function postConfigSave(array &$form, FormStateInterface $form_state) {
+    $this->routeBuilder->rebuildIfNeeded();
+  }
 
-    $form[$this->getPluginId()] = [
-      '#type' => 'textfield',
-      '#default_value' => $this->configuration[$this->getPluginId()],
-      '#description' => t('The path of the page displaying the Language Selection Page'),
-      '#required' => TRUE,
-      '#size' => 40,
-      '#field_prefix' => $base_url,
-    ];
-
-    return $form;
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    // Flush only if there is a change in the path.
+    if ($this->configuration[$this->getPluginId()] !== $form_state->getValue($this->getPluginId())) {
+      $this->routeBuilder->setRebuildNeeded();
+    }
+    parent::submitConfigurationForm($form, $form_state);
   }
 
   /**
@@ -195,26 +216,8 @@ class LanguageSelectionPageConditionPath extends LanguageSelectionPageConditionB
 
     // Check if the path already exists.
     if ($this->pathValidator->isValid($form_state->getValue($this->getPluginId())) && $form_state->getValue($this->getPluginId()) !== $configuration_lsp->get('path')) {
-      $form_state->setErrorByName($this->getPluginId(), $this->t("The path '%path' is invalid.", array('%path' => $form_state->getValue($this->getPluginId()))));
+      $form_state->setErrorByName($this->getPluginId(), $this->t("The path '%path' is invalid.", ['%path' => $form_state->getValue($this->getPluginId())]));
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Flush only if there is a change in the path.
-    if ($this->configuration[$this->getPluginId()] != $form_state->getValue($this->getPluginId())) {
-      $this->routeBuilder->setRebuildNeeded();
-    }
-    parent::submitConfigurationForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function postConfigSave(array &$form, FormStateInterface $form_state) {
-    $this->routeBuilder->rebuildIfNeeded();
   }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Path\CurrentPathStack;
@@ -23,13 +25,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class LanguageSelectionPageConditionPathIsValid extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {
 
   /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
    * The current path.
    *
    * @var \Drupal\Core\Path\CurrentPathStack
@@ -39,9 +34,16 @@ class LanguageSelectionPageConditionPathIsValid extends LanguageSelectionPageCon
   /**
    * The path validator.
    *
-   * @var PathValidatorInterface
+   * @var \Drupal\Core\Path\PathValidatorInterface
    */
   protected $pathValidator;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
 
   /**
    * Constructs a LanguageSelectionPageConditionPath plugin.
@@ -50,7 +52,7 @@ class LanguageSelectionPageConditionPathIsValid extends LanguageSelectionPageCon
    *   The request stack.
    * @param \Drupal\Core\Path\CurrentPathStack $current_path
    *   The current path.
-   * @param PathValidatorInterface $path_validator
+   * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
    *   The path validator.
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.

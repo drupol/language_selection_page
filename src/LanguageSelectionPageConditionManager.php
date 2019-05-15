@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -35,18 +37,7 @@ class LanguageSelectionPageConditionManager extends DefaultPluginManager impleme
   /**
    * {@inheritdoc}
    */
-  public function getDefinitions() {
-    $definitions = parent::getDefinitions();
-
-    uasort($definitions, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
-
-    return $definitions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createInstance($plugin_id, array $configuration = array()) {
+  public function createInstance($plugin_id, array $configuration = []) {
     $plugin = $this->getFactory()->createInstance($plugin_id, $configuration);
 
     // If we receive any context values via config set it into the plugin.
@@ -64,6 +55,17 @@ class LanguageSelectionPageConditionManager extends DefaultPluginManager impleme
    */
   public function execute(ExecutableInterface $condition) {
     return $condition->evaluate();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefinitions() {
+    $definitions = parent::getDefinitions();
+
+    uasort($definitions, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
+
+    return $definitions;
   }
 
 }

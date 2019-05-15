@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Component\Utility\Unicode;
@@ -33,6 +35,13 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
   protected $aliasManager;
 
   /**
+   * The current path.
+   *
+   * @var \Drupal\Core\Path\CurrentPathStack
+   */
+  protected $currentPath;
+
+  /**
    * The path matcher.
    *
    * @var \Drupal\Core\Path\PathMatcherInterface
@@ -45,13 +54,6 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
    * @var \Symfony\Component\HttpFoundation\RequestStack
    */
   protected $requestStack;
-
-  /**
-   * The current path.
-   *
-   * @var \Drupal\Core\Path\CurrentPathStack
-   */
-  protected $currentPath;
 
   /**
    * Constructs a RequestPath condition plugin.
@@ -77,6 +79,26 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
     $this->pathMatcher = $path_matcher;
     $this->requestStack = $request_stack;
     $this->currentPath = $current_path;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form[$this->getPluginId()] = [
+      '#type' => 'textarea',
+      '#default_value' => implode(PHP_EOL, (array) $this->configuration[$this->getPluginId()]),
+      '#size' => 10,
+      '#description' => $this->t('Specify on which paths the language selection pages should be circumvented.') . '<br />'
+      . $this->t("Specify pages by using their paths. A path must start with <em>/</em>. Enter one path per line. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page.",
+          [
+            '%blog' => '/blog',
+            '%blog-wildcard' => '/blog/*',
+            '%front' => '<front>',
+          ]),
+    ];
+
+    return $form;
   }
 
   /**
@@ -108,7 +130,7 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
       $path = $path === '/' ? $path : rtrim($path, '/');
       $path_alias = Unicode::strtolower($this->aliasManager->getAliasByPath($path));
 
-      $is_on_blacklisted_path = $this->pathMatcher->matchPath($path_alias, $blacklisted_path) || (($path != $path_alias) && $this->pathMatcher->matchPath($path, $blacklisted_path));
+      $is_on_blacklisted_path = $this->pathMatcher->matchPath($path_alias, $blacklisted_path) || (($path !== $path_alias) && $this->pathMatcher->matchPath($path, $blacklisted_path));
 
       if ($is_on_blacklisted_path) {
         return $this->block();
@@ -116,26 +138,6 @@ class LanguageSelectionPageConditionBlacklistedPaths extends LanguageSelectionPa
     }
 
     return $this->pass();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form[$this->getPluginId()] = [
-      '#type' => 'textarea',
-      '#default_value' => implode(PHP_EOL, (array) $this->configuration[$this->getPluginId()]),
-      '#size' => 10,
-      '#description' => $this->t('Specify on which paths the language selection pages should be circumvented.') . '<br />'
-      . $this->t("Specify pages by using their paths. A path must start with <em>/</em>. Enter one path per line. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page.",
-          [
-            '%blog' => '/blog',
-            '%blog-wildcard' => '/blog/*',
-            '%front' => '<front>',
-          ]),
-    ];
-
-    return $form;
   }
 
   /**

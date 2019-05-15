@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Form;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -41,29 +43,6 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('plugin.manager.language_selection_page_condition')
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFormId() {
-    return 'language_negotiation_configure_language_selection_page_form';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames() {
-    return ['language_selection_page.negotiation'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $this->config = $this->config('language_selection_page.negotiation');
     $manager = $this->languageSelectionPageConditionManager;
@@ -93,13 +72,17 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('plugin.manager.language_selection_page_condition')
+    );
+  }
 
-    /** @var \Drupal\language_selection_page\LanguageSelectionPageConditionInterface $condition */
-    foreach ($form_state->get(['conditions']) as $condition) {
-      $condition->validateConfigurationForm($form, $form_state);
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId() {
+    return 'language_negotiation_configure_language_selection_page_form';
   }
 
   /**
@@ -128,6 +111,25 @@ class NegotiationLanguageSelectionPageForm extends ConfigFormBase implements Con
     // behavior, and intended behavior for other language negotiation settings
     // forms in Drupal 8 core).
     $form_state->setRedirect('language.negotiation');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+
+    /** @var \Drupal\language_selection_page\LanguageSelectionPageConditionInterface $condition */
+    foreach ($form_state->get(['conditions']) as $condition) {
+      $condition->validateConfigurationForm($form, $form_state);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return ['language_selection_page.negotiation'];
   }
 
 }

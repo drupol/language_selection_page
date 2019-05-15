@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -24,13 +26,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LanguageSelectionPageConditionMethodIsValid extends LanguageSelectionPageConditionBase implements LanguageSelectionPageConditionInterface {
 
   /**
-   * The current path.
-   *
-   * @var LanguageNegotiatorInterface
-   */
-  protected $languageNegotiator;
-
-  /**
    * The current user.
    *
    * @var \Drupal\Core\Session\AccountInterface
@@ -38,9 +33,16 @@ class LanguageSelectionPageConditionMethodIsValid extends LanguageSelectionPageC
   protected $currentUser;
 
   /**
+   * The current path.
+   *
+   * @var \Drupal\language\LanguageNegotiatorInterface
+   */
+  protected $languageNegotiator;
+
+  /**
    * Constructs a LanguageCookieConditionPath plugin.
    *
-   * @param LanguageNegotiatorInterface $language_negotiator
+   * @param \Drupal\language\LanguageNegotiatorInterface $language_negotiator
    *   The language negotiator.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.

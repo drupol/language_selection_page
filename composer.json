@@ -4,6 +4,7 @@
     "type": "drupal-module",
     "license": "GPL-2.0+",
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "homepage": "https://drupal.org/project/language_selection_page",
     "authors": [
         {
@@ -16,5 +17,13 @@
         "issues": "https://drupal.org/project/issues/language_selection_page",
         "irc": "irc://irc.freenode.org/drupal-contribute",
         "source": "https://cgit.drupalcode.org/language_selection_page"
+    },
+    "require-dev": {
+        "drupol/drupal-conventions": "^1.4.12"
+    },
+    "extra": {
+        "grumphp": {
+            "config-default-path": "vendor/drupol/drupal-conventions/config/drupal8/grumphp.yml"
+        }
     }
 }

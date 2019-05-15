@@ -5,6 +5,8 @@
  * Module installation code.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Url;
 use Drupal\language_selection_page\Plugin\LanguageNegotiation\LanguageNegotiationLanguageSelectionPage;
 
@@ -14,7 +16,7 @@ use Drupal\language_selection_page\Plugin\LanguageNegotiation\LanguageNegotiatio
 function language_selection_page_requirements($phase) {
   $requirements = [];
 
-  if ('install' == $phase) {
+  if ($phase === 'install') {
     return $requirements;
   }
 

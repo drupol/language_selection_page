@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\Plugin\LanguageSelectionPageCondition;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -33,13 +35,6 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
   protected $configFactory;
 
   /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
    * The route match service.
    *
    * @var \Drupal\Core\Routing\RouteMatchInterface
@@ -52,6 +47,13 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
    * @var \Drupal\Core\Render\MainContent\MainContentRendererInterface
    */
   protected $mainContentRenderer;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
 
   /**
    * Constructs a LanguageSelectionPageConditionType plugin.
@@ -82,29 +84,19 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('request_stack'),
-      $container->get('current_route_match'),
-      $container->get('main_content_renderer.html'),
-      $configuration,
-      $plugin_id,
-      $plugin_definition);
-  }
+  public function alterPageContent(array &$content = [], $destination = '<front>') {
+    // TODO: update this using the config passed to the plugin.
+    $config = $this->configFactory->get('language_selection_page.negotiation');
 
-  /**
-   * {@inheritdoc}
-   */
-  public function evaluate() {
-    // Do not return any language if we use Drupal's block method
-    // to display the redirection.
-    // Be aware that this will automatically assign the default language.
-    if ('block' == $this->configuration[$this->getPluginId()]) {
-      return $this->block();
+    // Render the page if we have an array in $content instead of a
+    // RedirectResponse. Otherwise, redirect the user.
+    if ($config->get('type') === 'standalone' && !$content instanceof RedirectResponse) {
+      $content = [
+        '#type' => 'page',
+        '#title' => $config->get('title'),
+        'content' => $content,
+      ];
     }
-
-    return $this->pass();
   }
 
   /**
@@ -135,19 +127,29 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
   /**
    * {@inheritdoc}
    */
-  public function alterPageContent(array &$content = array(), $destination = '<front>') {
-    // TODO: update this using the config passed to the plugin.
-    $config = $this->configFactory->get('language_selection_page.negotiation');
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('request_stack'),
+      $container->get('current_route_match'),
+      $container->get('main_content_renderer.html'),
+      $configuration,
+      $plugin_id,
+      $plugin_definition);
+  }
 
-    // Render the page if we have an array in $content instead of a
-    // RedirectResponse. Otherwise, redirect the user.
-    if ('standalone' == $config->get('type') && !$content instanceof RedirectResponse) {
-      $content = [
-        '#type' => 'page',
-        '#title' => $config->get('title'),
-        'content' => $content,
-      ];
+  /**
+   * {@inheritdoc}
+   */
+  public function evaluate() {
+    // Do not return any language if we use Drupal's block method
+    // to display the redirection.
+    // Be aware that this will automatically assign the default language.
+    if ($this->configuration[$this->getPluginId()] === 'block') {
+      return $this->block();
     }
+
+    return $this->pass();
   }
 
   /**
@@ -160,7 +162,7 @@ class LanguageSelectionPageConditionType extends LanguageSelectionPageConditionB
 
     // If we display the LSP on a page, we must check
     // if the destination parameter is correctly set.
-    if ('block' != $config->get('type')) {
+    if ($config->get('type') !== 'block') {
       if (!empty($request->getQueryString())) {
         list(, $destination) = explode('=', $request->getQueryString(), 2);
         $destination = urldecode($destination);

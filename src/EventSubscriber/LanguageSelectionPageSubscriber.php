@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\language_selection_page\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -21,9 +23,23 @@ use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationSelected;
 class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
 
   /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The current path.
+   *
+   * @var \Drupal\Core\Path\CurrentPathStack
+   */
+  protected $currentPath;
+
+  /**
    * The event.
    *
-   * @var FilterResponseEvent
+   * @var \Symfony\Component\HttpKernel\Event\FilterResponseEvent
    */
   protected $event;
 
@@ -35,13 +51,6 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
   protected $languageManager;
 
   /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
    * The language negotiator.
    *
    * @var \Drupal\language\LanguageNegotiatorInterface
@@ -49,25 +58,18 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
   protected $languageNegotiator;
 
   /**
-   * The language path processor.
-   *
-   * @var \Drupal\language\HttpKernel\PathProcessorLanguage
-   */
-  protected $pathProcessorLanguage;
-
-  /**
-   * The current path.
-   *
-   * @var \Drupal\Core\Path\CurrentPathStack
-   */
-  protected $currentPath;
-
-  /**
    * The Language Selection Page condition plugin manager.
    *
    * @var \Drupal\Core\Executable\ExecutableManagerInterface
    */
   protected $languageSelectionPageConditionManager;
+
+  /**
+   * The language path processor.
+   *
+   * @var \Drupal\language\HttpKernel\PathProcessorLanguage
+   */
+  protected $pathProcessorLanguage;
 
   /**
    * Constructs a new class object.
@@ -92,32 +94,16 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Callback helper.
-   *
-   * @return array|bool
-   *   The language to use, or FALSE.
+   * {@inheritdoc}
    */
-  protected function getLanguage() {
-    // Get all methods available for the user interface language type.
-    $methods = $this->languageNegotiator->getNegotiationMethods(LanguageInterface::TYPE_INTERFACE);
+  public static function getSubscribedEvents() {
+    // You can set the order of execution of this event callback in the array.
+    // Find the order of execution by doing this in the Drupal Root:
+    // grep "$events[KernelEvents::RESPONSE][]" . -R | grep -v 'Test'
+    // The value is currently set to -50, feel free to adjust if needed.
+    $events[KernelEvents::RESPONSE][] = ['redirectToLanguageSelectionPage', -50];
 
-    // We ignore this language method or else it will always return a language.
-    unset($methods[LanguageNegotiationSelected::METHOD_ID]);
-
-    foreach ($methods as $method_id => $method_definition) {
-      // Do not consider methods with a lower priority than the language
-      // selection page method, nor the language selection page method itself.
-      if ($method_id == LanguageNegotiationLanguageSelectionPage::METHOD_ID) {
-        return FALSE;
-      }
-      $lang = $this->languageNegotiator->getNegotiationMethodInstance($method_id)->getLangcode($this->event->getRequest());
-      if ($lang) {
-        return $lang;
-      }
-    }
-
-    // If no other language was found, use the default one.
-    return $this->languageManager->getDefaultLanguage()->getId();
+    return $events;
   }
 
   /**
@@ -145,7 +131,7 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
 
     if (!$this->getLanguage()) {
       $request = $this->event->getRequest();
-      $url = sprintf('%s?destination=%s', $request->getBasePath().$config->get('path'), $this->currentPath->getPath($request));
+      $url = sprintf('%s?destination=%s', $request->getBasePath() . $config->get('path'), $this->currentPath->getPath($request));
       $response = new RedirectResponse($url);
 
       $event->setResponse($response);
@@ -155,15 +141,32 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Callback helper.
+   *
+   * @return array|bool
+   *   The language to use, or FALSE.
    */
-  public static function getSubscribedEvents() {
-    // You can set the order of execution of this event callback in the array.
-    // Find the order of execution by doing this in the Drupal Root:
-    // grep "$events[KernelEvents::RESPONSE][]" . -R | grep -v 'Test'
-    // The value is currently set to -50, feel free to adjust if needed.
-    $events[KernelEvents::RESPONSE][] = array('redirectToLanguageSelectionPage', -50);
-    return $events;
+  protected function getLanguage() {
+    // Get all methods available for the user interface language type.
+    $methods = $this->languageNegotiator->getNegotiationMethods(LanguageInterface::TYPE_INTERFACE);
+
+    // We ignore this language method or else it will always return a language.
+    unset($methods[LanguageNegotiationSelected::METHOD_ID]);
+
+    foreach ($methods as $method_id => $method_definition) {
+      // Do not consider methods with a lower priority than the language
+      // selection page method, nor the language selection page method itself.
+      if ($method_id === LanguageNegotiationLanguageSelectionPage::METHOD_ID) {
+        return FALSE;
+      }
+      $lang = $this->languageNegotiator->getNegotiationMethodInstance($method_id)->getLangcode($this->event->getRequest());
+      if ($lang) {
+        return $lang;
+      }
+    }
+
+    // If no other language was found, use the default one.
+    return $this->languageManager->getDefaultLanguage()->getId();
   }
 
 }
