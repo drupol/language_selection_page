@@ -103,7 +103,6 @@ class LanguageSelectionPageSubscriber implements EventSubscriberInterface {
 
     // We ignore this language method or else it will always return a language.
     unset($methods[LanguageNegotiationSelected::METHOD_ID]);
-    uasort($methods, 'Drupal\Component\Utility\SortArray::sortByWeightElement');
 
     foreach ($methods as $method_id => $method_definition) {
       // Do not consider methods with a lower priority than the language
